@@ -1,12 +1,15 @@
+from webargs import fields
 from flask import jsonify, request
+from flask_apispec import marshal_with, use_kwargs
 from flask_jwt_extended import jwt_required
 
 from application import app
-from application.models import Location, Event, Participant
+from application.models import Location, Event, Participant, EventType
 from application.schemas import LocationSchema, EventSchema, ParticipantSchema
 
 
 @app.route('/locations/', methods=['GET'])
+@marshal_with(LocationSchema(many=True))
 def get_locations():
     locations = Location.query.all()
     locations_schema = LocationSchema(many=True)
@@ -14,14 +17,16 @@ def get_locations():
 
 
 @app.route('/events/', methods=['GET'])
-def get_events():
-    eventtype = request.args.get('eventtype')
+@use_kwargs({'event_type': fields.Str(enum=[evt for evt, _ in EventType])}, locations=('query',))
+@marshal_with(EventSchema(many=True))
+def get_events(**kwargs):
+    event_type = request.args.get('event_type')
     location = request.args.get('location')
 
     query = Event.query
 
-    if eventtype:
-        query = query.filter(Event.type == eventtype)
+    if event_type:
+        query = query.filter(Event.type == event_type)
     if location:
         query = query.join(Location).filter(Location.code == location)
 
