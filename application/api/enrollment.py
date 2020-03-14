@@ -1,5 +1,6 @@
 from flask import jsonify
 from sqlalchemy import and_
+from flask_apispec import marshal_with
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -33,6 +34,7 @@ def post_enrollments(event_id):
 
 @app.route('/enrollments/<int:event_id>/', methods=['DELETE'])
 @jwt_required
+@marshal_with(None, code=204)
 def delete_enrollment(event_id):
 
     event = Event.query.filter_by(id=event_id).first()
@@ -48,7 +50,7 @@ def delete_enrollment(event_id):
 
         db.session.delete(enrollment)
         db.session.commit()
-        return jsonify({"status": "success"}), 204
+        return None
     except (IntegrityError, NoResultFound) as e:
         app.logger.error(e)
         return jsonify({"status": "error"}), 400

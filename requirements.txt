@@ -15,5 +15,6 @@ Werkzeug==1.0.0
 WTForms==2.2.1
 Flask-Migrate==2.5.2
 SQLAlchemy-Utils==0.36.1
-Flask-JWT-Extended==3.24.1
-flask-apispec
+webargs==5.5.3
+flask-apispec==0.8.7
+apispec==3.3.0

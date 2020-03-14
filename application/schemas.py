@@ -1,5 +1,4 @@
 from marshmallow import Schema, fields, post_load
-from werkzeug.security import generate_password_hash
 
 from application.models import EventType, CategoryType, Location, Event, Participant
 
@@ -46,11 +45,11 @@ class ParticipantSchema(Schema):
     id = fields.Integer()
     name = fields.String(required=True)
     email = fields.Email(required=True)
-    password = fields.Method(deserialize="load_password", load_only=True, required=True)
+    password = fields.String(load_only=True, required=True)
     picture = fields.String()
     location = fields.String(required=True)
     about = fields.String()
-    enrollments = fields.List(fields.Nested('EnrollmentSchema', exclude=('participant',)))
+    enrollments = fields.List(fields.Nested('EnrollmentSchema', only=("id", )))
     events = fields.Method("get_events", exclude=('participants',), deserialize="load_events")
 
     @post_load()
@@ -64,10 +63,6 @@ class ParticipantSchema(Schema):
     @staticmethod
     def get_events(obj):
         return [e.id for e in obj.events]
-
-    @staticmethod
-    def load_password(password):
-        return generate_password_hash(str(password))
 
 
 class EnrollmentSchema(Schema):

@@ -1,7 +1,7 @@
 from webargs import fields
 from flask import jsonify, request
-from flask_apispec import marshal_with, use_kwargs
 from flask_jwt_extended import jwt_required
+from flask_apispec import marshal_with, use_kwargs
 
 from application import app
 from application.models import Location, Event, Participant, EventType
@@ -37,6 +37,7 @@ def get_events(**kwargs):
 
 @app.route('/profile/<int:uid>/', methods=['GET'])
 @jwt_required
+@marshal_with(ParticipantSchema(many=True))
 def get_profile(uid):
     participant = Participant.query.filter_by(id=uid).first()
 

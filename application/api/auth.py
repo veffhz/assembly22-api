@@ -1,6 +1,7 @@
-from flask import jsonify, request
+from flask_apispec import use_kwargs
 from marshmallow import ValidationError
 from sqlalchemy.exc import IntegrityError
+from flask import jsonify, request, make_response
 from flask_jwt_extended import create_access_token
 
 from application import app
@@ -9,7 +10,8 @@ from application.schemas import ParticipantSchema
 
 
 @app.route('/auth/', methods=['POST'])
-def post_auth():
+@use_kwargs(ParticipantSchema(only=('email', 'password')))
+def post_auth(*args):
     data = request.json
 
     email = data.get("email")
@@ -20,16 +22,19 @@ def post_auth():
     if participant and participant.check_password(password):
         access_token = create_access_token(identity=email)
         participant_schema = ParticipantSchema()
-        return jsonify({
+        return make_response(jsonify({
             'participant': participant_schema.dump(participant),
             'key': access_token
-        }), 200
+        }), 200)
     else:
-        return jsonify({"status": "error"}), 401
+        return make_response(
+            jsonify({"status": "error"}), 401
+        )
 
 
 @app.route('/register/', methods=['POST'])
-def post_register():
+@use_kwargs(ParticipantSchema)
+def post_register(*args):
     data = request.json
 
     try:
@@ -37,10 +42,12 @@ def post_register():
         participant = participant_schema.load(data)
         db.session.add(participant)
         db.session.commit()
-        return jsonify({
-            'participant': participant_schema.dump(participant),
-            'password': data.get("password")
-        }), 201
+        return make_response(jsonify({
+                'participant': participant_schema.dump(participant),
+                'password': data.get("password")
+            }), 201)
     except (IntegrityError, ValidationError) as e:
         app.logger.error(e)
-        return jsonify({"status": "error"}), 400
+        return make_response(
+            jsonify({"status": "error"}), 400
+        )
