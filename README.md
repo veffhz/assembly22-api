@@ -5,6 +5,7 @@
  - rest api for participants, events
  - jwt token authentication
  - admin panel for manage service data
+ - swagger ui for testing api
  
 ##### requirements:
  - Python 3.5+
@@ -22,3 +23,4 @@
  - run `gunicorn 'wsgi:app'`
  - register on http://localhost:8000/register/
  - get token on http://localhost:8000/auth/
+ - or open http://localhost:8000/swagger-ui/
