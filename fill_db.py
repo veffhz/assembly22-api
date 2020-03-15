@@ -166,6 +166,16 @@ participants = [
         'about': "just me",
         'events': [1, 2, 3, 4, 5]
     },
+    {
+        'id': "7",
+        'name': "Swagger user",
+        'email': "user@example.com",
+        'password': "string",
+        'picture': "pic7.png",
+        'location': "matrix",
+        'about': "vip",
+        'events': [5]
+    },
 ]
 
 
