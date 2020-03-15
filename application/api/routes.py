@@ -1,7 +1,6 @@
-from webargs import fields
-from flask import jsonify, request
 from flask_jwt_extended import jwt_required
-from flask_apispec import marshal_with, use_kwargs
+from flask_apispec import marshal_with, doc
+from flask import jsonify, request, make_response
 
 from application import app
 from application.models import Location, Event, Participant, EventType
@@ -17,9 +16,23 @@ def get_locations():
 
 
 @app.route('/events/', methods=['GET'])
-@use_kwargs({'event_type': fields.Str(enum=[evt for evt, _ in EventType])}, locations=('query',))
+@doc(
+    description='Get all events',
+    params={
+        'event_type': {
+            'description': 'Type param for event, like: <b>workshop</b>',
+            'in': 'query',
+            'enum': [evt for evt, _ in EventType],
+            'type': 'string'
+        },
+        'location': {
+            'description': 'Location param for event, like: <b>msc</b>',
+            'in': 'query',
+            'type': 'string'
+        }
+    })
 @marshal_with(EventSchema(many=True))
-def get_events(**kwargs):
+def get_events():
     event_type = request.args.get('event_type')
     location = request.args.get('location')
 
@@ -30,19 +43,28 @@ def get_events(**kwargs):
     if location:
         query = query.join(Location).filter(Location.code == location)
 
-    events = query.all()
-    events_schema = EventSchema(many=True)
-    return jsonify(events_schema.dump(events))
+    return query.all()
 
 
 @app.route('/profile/<int:uid>/', methods=['GET'])
+@doc(
+    description='Token access',
+    params={
+        'Authorization': {
+            'description': 'Authorization HTTP header with JWT access token, like: <b>Bearer token<b>',
+            'in': 'header',
+            'type': 'string',
+            'required': True
+        }
+    })
 @jwt_required
-@marshal_with(ParticipantSchema(many=True))
+@marshal_with(ParticipantSchema(), code=200)
 def get_profile(uid):
     participant = Participant.query.filter_by(id=uid).first()
 
     if participant:
-        participant_schema = ParticipantSchema()
-        return jsonify(participant_schema.dump(participant)), 200
+        return participant
     else:
-        return jsonify({"status": "error"}), 404
+        return make_response(
+            jsonify({"status": "error"}), 404
+        )

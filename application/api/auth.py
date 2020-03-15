@@ -14,8 +14,8 @@ from application.schemas import ParticipantSchema
 def post_auth(*args):
     data = request.json
 
-    email = data.get("email")
-    password = data.get("password")
+    email = data.get("email", None)
+    password = data.get("password", None)
 
     participant = Participant.query.filter_by(email=email).first()
 
@@ -43,9 +43,9 @@ def post_register(*args):
         db.session.add(participant)
         db.session.commit()
         return make_response(jsonify({
-                'participant': participant_schema.dump(participant),
-                'password': data.get("password")
-            }), 201)
+            'participant': participant_schema.dump(participant),
+            'password': data.get("password")
+        }), 201)
     except (IntegrityError, ValidationError) as e:
         app.logger.error(e)
         return make_response(
