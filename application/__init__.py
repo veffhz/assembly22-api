@@ -13,7 +13,10 @@ app.config.update({
     'APISPEC_SPEC': APISpec(
         title='assembly22',
         version='v1',
-        plugins=[MarshmallowPlugin(), DisableOptionsOperationPlugin()],
+        plugins=[
+            MarshmallowPlugin(schema_name_resolver=lambda _: False),  # hack to disable warnings
+            DisableOptionsOperationPlugin()
+        ],
         openapi_version="2.0",
     ),
     'APISPEC_SWAGGER_URL': '/swagger/',
@@ -21,7 +24,6 @@ app.config.update({
 
 
 def register_routes(docs):
-
     from application.api.routes import get_events, get_locations
     from application.api.routes import get_profile
     from application.api.enrollment import post_enrollments, delete_enrollment
