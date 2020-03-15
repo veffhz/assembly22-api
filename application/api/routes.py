@@ -10,9 +10,7 @@ from application.schemas import LocationSchema, EventSchema, ParticipantSchema
 @app.route('/locations/', methods=['GET'])
 @marshal_with(LocationSchema(many=True))
 def get_locations():
-    locations = Location.query.all()
-    locations_schema = LocationSchema(many=True)
-    return jsonify(locations_schema.dump(locations))
+    return Location.query.all()
 
 
 @app.route('/events/', methods=['GET'])
