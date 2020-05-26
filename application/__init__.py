@@ -1,26 +1,11 @@
 from flask import Flask
-from apispec import APISpec
-from apispec.ext.marshmallow import MarshmallowPlugin
 
 from config import Config
-from application.extensions import db, migrate
-from application.extensions import admin_manager, jwt, docs
-from application.plugins import DisableOptionsOperationPlugin
+from application.spec import api_spec
+from application.extensions import db, migrate, jwt
+from application.extensions import admin_manager, docs
 
 app = Flask(__name__)
-
-app.config.update({
-    'APISPEC_SPEC': APISpec(
-        title='assembly22',
-        version='v1',
-        plugins=[
-            MarshmallowPlugin(schema_name_resolver=lambda _: False),  # hack to disable warnings
-            DisableOptionsOperationPlugin()
-        ],
-        openapi_version="2.0",
-    ),
-    'APISPEC_SWAGGER_URL': '/swagger/',
-})
 
 
 def register_routes(docs):
@@ -49,7 +34,9 @@ def register_blueprints(app):
 
 
 def create_app(config_class=Config):
+    app.config.update(api_spec)
     app.config.from_object(config_class)
+
     from application.models import db
     from application.admin import init_admin
     from application import api
