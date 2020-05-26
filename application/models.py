@@ -1,7 +1,6 @@
 from datetime import datetime
 
 from sqlalchemy import event
-from sqlalchemy.orm.base import NO_VALUE
 from sqlalchemy_utils import ChoiceType
 from werkzeug.security import generate_password_hash, check_password_hash
 
