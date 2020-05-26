@@ -27,8 +27,10 @@ def register_blueprints(app):
     from application.api.routes import api_bp
     from application.api.enrollment import enroll_bp
     from application.api.auth import auth_bp
+    from application.api.error_handlers import err_bp
 
-    app.register_blueprint(api_bp, url_prefix='/')
+    app.register_blueprint(api_bp)
+    app.register_blueprint(err_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth/')
     app.register_blueprint(enroll_bp, url_prefix='/enrollments/')
 
@@ -39,7 +41,7 @@ def create_app(config_class=Config):
 
     from application.models import db
     from application.admin import init_admin
-    from application import api
+
     db.init_app(app)
     migrate.init_app(app, db)
     admin_manager.init_app(app)

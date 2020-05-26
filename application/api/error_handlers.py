@@ -1,22 +1,31 @@
+import logging
+
 from werkzeug import exceptions
-from flask import jsonify, make_response
+from flask import jsonify, Blueprint
 
-from application import app
+err_bp = Blueprint('errors', __name__)
+logger = logging.getLogger(__name__)
 
 
-@app.errorhandler(exceptions.NotFound)
+@err_bp.app_errorhandler(exceptions.NotFound)
 def not_found(e):
-    app.logger.info(e)
+    logger.info(e)
     return jsonify({'error': 'not found'}), e.code
 
 
-@app.errorhandler(exceptions.InternalServerError)
+@err_bp.app_errorhandler(exceptions.InternalServerError)
 def server_error(e):
-    app.logger.error(e, exc_info=app.debug)
+    logger.error(e, exc_info=True)
     return jsonify({'error': 'server_error'}), e.code
 
 
-@app.errorhandler(exceptions.HTTPException)
+@err_bp.app_errorhandler(exceptions.UnprocessableEntity)
+def validation_error(e):
+    logger.warning(e, exc_info=True)
+    return jsonify({'error': f'validation error: {e.data.get("messages")}'}), e.code
+
+
+@err_bp.app_errorhandler(exceptions.HTTPException)
 def error_all(e):
-    app.logger.warn(e, exc_info=app.debug)
-    return make_response(jsonify({'error': 'http error'}), e.code)
+    logger.warning(e, exc_info=True)
+    return jsonify({'error': f'http error: {repr(e)}'}), e.code
