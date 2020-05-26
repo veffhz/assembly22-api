@@ -1,15 +1,18 @@
+import logging
 from flask_apispec import use_kwargs
 from marshmallow import ValidationError
 from sqlalchemy.exc import IntegrityError
-from flask import jsonify, request, make_response
 from flask_jwt_extended import create_access_token
+from flask import jsonify, request, make_response, Blueprint
 
-from application import app
 from application.models import db, Participant
 from application.schemas import ParticipantSchema
 
+auth_bp = Blueprint('auth', __name__)
+logger = logging.getLogger(__name__)
 
-@app.route('/auth/', methods=['POST'])
+
+@auth_bp.route('/', methods=['POST'])
 @use_kwargs(ParticipantSchema(only=('email', 'password')))
 def post_auth(*args):
     data = request.json
@@ -32,7 +35,7 @@ def post_auth(*args):
         )
 
 
-@app.route('/register/', methods=['POST'])
+@auth_bp.route('/register/', methods=['POST'])
 @use_kwargs(ParticipantSchema)
 def post_register(*args):
     data = request.json
@@ -47,7 +50,7 @@ def post_register(*args):
             'password': data.get("password")
         }), 201)
     except (IntegrityError, ValidationError) as e:
-        app.logger.error(e)
+        logger.error(e)
         return make_response(
             jsonify({"status": "error"}), 400
         )

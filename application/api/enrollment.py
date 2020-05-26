@@ -1,15 +1,18 @@
+import logging
 from sqlalchemy import and_
 from flask_apispec import doc
-from flask import jsonify, make_response
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
+from flask import jsonify, make_response, Blueprint
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from application import app
 from application.models import db, Event, Participant, Enrollment
 
+enroll_bp = Blueprint('enroll', __name__)
+logger = logging.getLogger(__name__)
 
-@app.route('/enrollments/<int:event_id>/', methods=['POST'])
+
+@enroll_bp.route('/enrollments/<int:event_id>/', methods=['POST'])
 @doc(
     description='Enroll to event',
     params={
@@ -45,13 +48,13 @@ def post_enrollments(event_id):
             jsonify({"status": "success"}), 201
         )
     except IntegrityError as e:
-        app.logger.error(e)
+        logger.error(e)
         return make_response(
             jsonify({"status": "error"}), 400
         )
 
 
-@app.route('/enrollments/<int:event_id>/', methods=['DELETE'])
+@enroll_bp.route('/enrollments/<int:event_id>/', methods=['DELETE'])
 @doc(
     description='Unsubscribe from event',
     params={
@@ -87,7 +90,7 @@ def delete_enrollment(event_id):
             jsonify({}), 204
         )
     except (IntegrityError, NoResultFound) as e:
-        app.logger.error(e)
+        logger.error(e)
         return make_response(
             jsonify({"status": "error"}), 400
         )

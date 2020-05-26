@@ -1,19 +1,22 @@
+import logging
 from flask_jwt_extended import jwt_required
 from flask_apispec import marshal_with, doc
-from flask import jsonify, request, make_response
+from flask import jsonify, request, make_response, Blueprint
 
-from application import app
 from application.models import Location, Event, Participant, EventType
 from application.schemas import LocationSchema, EventSchema, ParticipantSchema
 
+api_bp = Blueprint('api', __name__)
+logger = logging.getLogger(__name__)
 
-@app.route('/locations/', methods=['GET'])
+
+@api_bp.route('/locations/', methods=['GET'])
 @marshal_with(LocationSchema(many=True))
 def get_locations():
     return Location.query.all()
 
 
-@app.route('/events/', methods=['GET'])
+@api_bp.route('/events/', methods=['GET'])
 @doc(
     description='Get all events',
     params={
@@ -44,7 +47,7 @@ def get_events():
     return query.all()
 
 
-@app.route('/profile/<int:uid>/', methods=['GET'])
+@api_bp.route('/profile/<int:uid>/', methods=['GET'])
 @doc(
     description='Token access',
     params={

@@ -15,7 +15,7 @@ class EventSchema(Schema):
     location = fields.Nested('LocationSchema', required=True, dump_only=True)
     address = fields.String(required=True)
     seats = fields.Integer(required=True)
-    enrollments = fields.List(fields.Nested('EnrollmentSchema', only=('id','datetime')))
+    enrollments = fields.List(fields.Nested('EnrollmentSchema', only=('id', 'datetime')))
     participants = fields.List(fields.Nested('ParticipantSchema', only=('name',)))
 
     @post_load()
@@ -42,14 +42,14 @@ class EventSchema(Schema):
 
 
 class ParticipantSchema(Schema):
-    id = fields.Integer()
+    id = fields.Integer(dump_only=True)
     name = fields.String(required=True)
     email = fields.Email(required=True)
     password = fields.String(load_only=True, required=True)
     picture = fields.String()
     location = fields.String(required=True)
     about = fields.String()
-    enrollments = fields.List(fields.Nested('EnrollmentSchema', only=("id", )))
+    enrollments = fields.List(fields.Nested('EnrollmentSchema', only=("id", )), dump_only=True)
     events = fields.Method("get_events", exclude=('participants',), deserialize="load_events")
 
     @post_load()
